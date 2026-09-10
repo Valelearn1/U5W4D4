@@ -109,6 +109,21 @@ class NotificaPushTest {
 	}
 
 	@Test
+	@DisplayName("Sessione senza topic (la campanella): riceve anche le notifiche di canale")
+	void sessioneGeneraleRiceveAncheIlCanale() throws Exception {
+		Raccoglitore r = new Raccoglitore(1);
+		try (WebSocketSession sessione = connetti(alice, null, r)) {
+
+			notificaService.crea(new NuovaNotificaRequest(
+					TipoNotifica.CANALE, null, canale.getId(), "anche alla campanella"));
+
+			assertThat(r.latch.await(5, TimeUnit.SECONDS))
+					.as("la vista generale deve ricevere tutto").isTrue();
+			assertThat(r.messaggi.getFirst()).contains("anche alla campanella");
+		}
+	}
+
+	@Test
 	@DisplayName("Notifica PERSONAL: arriva anche senza topic, e solo al destinatario")
 	void pushPersonalSoloAlDestinatario() throws Exception {
 		Raccoglitore perAlice = new Raccoglitore(1);

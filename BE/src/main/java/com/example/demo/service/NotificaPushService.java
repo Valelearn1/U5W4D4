@@ -56,14 +56,25 @@ public class NotificaPushService {
 	}
 
 	/**
-	 * Notifica di canale -> solo le sessioni in ascolto su QUEL canale.
-	 * Notifica di sistema (PERSONAL/ALL) -> tutte le sessioni dell'utente, qualunque topic.
+	 * Regole di consegna:
+	 *  - notifica di sistema (PERSONAL/ALL) -> a tutte le sessioni dell'utente;
+	 *  - sessione SENZA topic ("campanella", vista generale) -> riceve tutto cio' che
+	 *    e' indirizzato a lei, comprese le notifiche di canale;
+	 *  - sessione CON topic (l'utente sta guardando un canale) -> solo quel canale.
+	 *
+	 * Il caso della sessione senza topic e' quello che serve al frontend: senza,
+	 * per vedere le notifiche di canale in tempo reale servirebbe una connessione
+	 * WebSocket per ogni canale seguito. Non c'e' rischio di fuga di dati: il
+	 * destinatario della riga e' gia' il filtro principale.
 	 */
 	private boolean topicCompatibile(WebSocketSession session, UUID topicNotifica) {
 		if (topicNotifica == null) {
 			return true;
 		}
 		Object topicSessione = session.getAttributes().get(WebSocketSessionRegistry.ATTR_TOPIC);
+		if (topicSessione == null) {
+			return true;
+		}
 		return Objects.equals(topicSessione, topicNotifica);
 	}
 }
