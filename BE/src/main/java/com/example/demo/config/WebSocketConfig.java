@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
-import com.example.demo.websocket.EchoWebSocketHandler;
+import com.example.demo.security.JwtHandshakeInterceptor;
+import com.example.demo.websocket.NotificaWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -14,15 +15,22 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
-	private final EchoWebSocketHandler echoWebSocketHandler;
+	private static final String ORIGINE_FRONTEND = "http://localhost:5173";
 
-	public WebSocketConfig(EchoWebSocketHandler echoWebSocketHandler) {
-		this.echoWebSocketHandler = echoWebSocketHandler;
+	private final NotificaWebSocketHandler notificaWebSocketHandler;
+	private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
+	public WebSocketConfig(NotificaWebSocketHandler notificaWebSocketHandler,
+	                       JwtHandshakeInterceptor jwtHandshakeInterceptor) {
+		this.notificaWebSocketHandler = notificaWebSocketHandler;
+		this.jwtHandshakeInterceptor = jwtHandshakeInterceptor;
 	}
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(echoWebSocketHandler, "/ws/echo")
-				.setAllowedOrigins("http://localhost:5173");
+		// ws://localhost:8080/ws/notifiche?token=<JWT>[&topic=<uuid-canale>]
+		registry.addHandler(notificaWebSocketHandler, "/ws/notifiche")
+				.addInterceptors(jwtHandshakeInterceptor)
+				.setAllowedOrigins(ORIGINE_FRONTEND);
 	}
 }
