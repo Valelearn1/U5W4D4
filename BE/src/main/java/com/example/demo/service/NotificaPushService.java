@@ -3,12 +3,12 @@ package com.example.demo.service;
 import com.example.demo.dto.NotificaResponse;
 import com.example.demo.entity.Notifica;
 import com.example.demo.websocket.WebSocketSessionRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import tools.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -18,10 +18,9 @@ import java.util.UUID;
  * Consegna immediata via WebSocket, se il destinatario e' connesso.
  * Se non lo e' non succede nulla: la notifica resta sul database e la vedra' al prossimo GetAll.
  */
+@Slf4j
 @Service
 public class NotificaPushService {
-
-	private static final Logger log = LoggerFactory.getLogger(NotificaPushService.class);
 
 	private final WebSocketSessionRegistry registry;
 	private final ObjectMapper objectMapper;

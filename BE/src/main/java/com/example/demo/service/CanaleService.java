@@ -6,6 +6,7 @@ import com.example.demo.entity.Canale;
 import com.example.demo.entity.Utente;
 import com.example.demo.repository.CanaleRepository;
 import com.example.demo.repository.UtenteRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class CanaleService {
 
@@ -72,6 +74,8 @@ public class CanaleService {
 		canale.setCreatore(creatore);
 
 		// saveAndFlush: serve a far valorizzare @CreationTimestamp prima di leggere createdAt
-		return CanaleResponse.da(canaleRepository.saveAndFlush(canale));
+		Canale salvato = canaleRepository.saveAndFlush(canale);
+		log.info("canale creato: {} ({}) da {}", salvato.getNome(), salvato.getId(), creatore.getUsername());
+		return CanaleResponse.da(salvato);
 	}
 }

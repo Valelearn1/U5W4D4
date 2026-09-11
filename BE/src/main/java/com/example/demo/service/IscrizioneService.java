@@ -6,6 +6,7 @@ import com.example.demo.entity.Utente;
 import com.example.demo.repository.CanaleRepository;
 import com.example.demo.repository.IscrizioneRepository;
 import com.example.demo.repository.UtenteRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class IscrizioneService {
 
@@ -50,8 +52,12 @@ public class IscrizioneService {
 		iscrizione.setCanale(canale);
 
 		try {
-			return iscrizioneRepository.save(iscrizione).getId();
+			UUID idIscrizione = iscrizioneRepository.save(iscrizione).getId();
+			log.info("utente {} ora segue il canale {}", utenteId, canaleId);
+			return idIscrizione;
 		} catch (DataIntegrityViolationException e) {
+			// ci si arriva solo con due follow simultanei: il vincolo UNIQUE ha fermato il secondo
+			log.warn("follow simultaneo sul canale {} da parte dell'utente {}", canaleId, utenteId);
 			throw new IllegalStateException("iscrizione gia' esistente", e);
 		}
 	}
@@ -63,6 +69,7 @@ public class IscrizioneService {
 				.findByUtenteIdAndCanaleId(utenteId, canaleId)
 				.orElseThrow(() -> new NoSuchElementException("iscrizione non trovata"));
 		iscrizioneRepository.delete(iscrizione);
+		log.info("utente {} ha smesso di seguire il canale {}", utenteId, canaleId);
 	}
 
 	@Transactional(readOnly = true)

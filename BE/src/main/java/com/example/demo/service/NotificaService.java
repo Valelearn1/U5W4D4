@@ -16,11 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class NotificaService {
 
@@ -128,6 +131,8 @@ public class NotificaService {
 		// saveAllAndFlush, non saveAll: senza il flush @CreationTimestamp non e' ancora
 		// stato valorizzato e createdAt uscirebbe null nella risposta e nel push WebSocket.
 		List<Notifica> salvate = notificaRepository.saveAllAndFlush(daSalvare);
+		log.info("create {} notifiche di tipo {}{}", salvate.size(), richiesta.tipo(),
+				canaleFinale == null ? "" : " sul canale " + canaleFinale.getId());
 		inviaDopoIlCommit(salvate);
 
 		return salvate.stream().map(NotificaResponse::da).toList();

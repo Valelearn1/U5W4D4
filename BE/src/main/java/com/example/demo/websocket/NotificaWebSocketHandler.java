@@ -7,6 +7,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.URI;
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ import java.util.UUID;
  * JwtHandshakeInterceptor verificando la firma del token, prima ancora che la
  * sessione venga aperta.
  */
+@Slf4j
 @Component
 public class NotificaWebSocketHandler extends TextWebSocketHandler {
 
@@ -42,6 +45,7 @@ public class NotificaWebSocketHandler extends TextWebSocketHandler {
 			session.getAttributes().put(WebSocketSessionRegistry.ATTR_TOPIC, topic);
 		}
 		registry.registra(utente.id(), session);
+		log.debug("WebSocket aperto per {} (topic: {})", utente.username(), topic == null ? "nessuno" : topic);
 	}
 
 	@Override
@@ -49,6 +53,7 @@ public class NotificaWebSocketHandler extends TextWebSocketHandler {
 		Object utenteId = session.getAttributes().get(WebSocketSessionRegistry.ATTR_UTENTE_ID);
 		if (utenteId instanceof UUID id) {
 			registry.rimuovi(id, session);
+			log.debug("WebSocket chiuso per {} ({})", id, status);
 		}
 	}
 

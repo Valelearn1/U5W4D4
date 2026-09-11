@@ -1,13 +1,13 @@
 package com.example.demo.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.NoSuchElementException;
 
@@ -22,10 +22,9 @@ import java.util.NoSuchElementException;
  *
  * ProblemDetail e' il formato standard RFC 9457 per gli errori HTTP.
  */
+@Slf4j
 @RestControllerAdvice
 public class GestoreErrori extends ResponseEntityExceptionHandler {
-
-	private static final Logger log = LoggerFactory.getLogger(GestoreErrori.class);
 
 	/** Risorsa inesistente, o non appartenente all'utente che la chiede. */
 	@ExceptionHandler(NoSuchElementException.class)

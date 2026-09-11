@@ -9,6 +9,8 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 
 /**
@@ -22,6 +24,7 @@ import java.util.Map;
  * gli URL finiscono nei log dei server e dei proxy - che si mitiga tenendo i token
  * a vita breve (qui 60 minuti).
  */
+@Slf4j
 @Component
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
@@ -42,6 +45,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 				.build().getQueryParams().getFirst("token");
 
 		if (token == null || token.isBlank()) {
+			log.debug("handshake WebSocket respinto: nessun token");
 			response.setStatusCode(HttpStatus.UNAUTHORIZED);
 			return false;
 		}
@@ -49,6 +53,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 			attributes.put(ATTR_UTENTE, jwtService.leggi(token));
 			return true;
 		} catch (JwtException | IllegalArgumentException e) {
+			// si registra il motivo, mai il token
+			log.debug("handshake WebSocket respinto: {}", e.getMessage());
 			response.setStatusCode(HttpStatus.UNAUTHORIZED);
 			return false;
 		}

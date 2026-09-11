@@ -56,9 +56,12 @@ class CanaleIscrizioneServiceTest {
 
 		Page<CanaleResponse> pagina = canaleService.getTutti(0, CanaleService.DIMENSIONE_PAGINA);
 
+		// containsSubsequence e non containsExactly: nel database possono esserci gia'
+		// altri canali, e il test deve verificare l'ORDINE dei suoi, non essere l'unico
+		// inquilino della tabella.
 		assertThat(pagina.getContent())
 				.extracting(CanaleResponse::nome)
-				.containsExactly("nuovo", "medio", "vecchio");
+				.containsSubsequence("nuovo", "medio", "vecchio");
 	}
 
 	@Test

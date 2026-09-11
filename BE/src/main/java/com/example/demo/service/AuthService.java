@@ -12,7 +12,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -50,7 +52,9 @@ public class AuthService {
 		utente.setPassword(passwordEncoder.encode(richiesta.password()));
 		utente.setRuolo(Ruolo.USER);
 
-		return UtenteResponse.da(utenteRepository.saveAndFlush(utente));
+		UtenteResponse creato = UtenteResponse.da(utenteRepository.saveAndFlush(utente));
+		log.info("nuovo utente registrato: {} ({})", creato.username(), creato.id());
+		return creato;
 	}
 
 	@Transactional(readOnly = true)
@@ -62,8 +66,12 @@ public class AuthService {
 				.orElseThrow(() -> new BadCredentialsException("credenziali non valide"));
 
 		if (!passwordEncoder.matches(richiesta.password(), utente.getPassword())) {
+			// si registra CHI ha fallito, mai la password tentata
+			log.warn("login fallito per l'utente {}", utente.getUsername());
 			throw new BadCredentialsException("credenziali non valide");
 		}
+
+		log.info("login riuscito: {} ({})", utente.getUsername(), utente.getRuolo());
 
 		return LoginResponse.di(
 				jwtService.genera(utente),
